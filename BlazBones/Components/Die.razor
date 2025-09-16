@@ -13,7 +13,7 @@
     public bool selected { get; set; } = false;
     public bool locked { get; set; } = false;
     public bool dark { get; set; } = true;
-    private string backgroundColor { get; set; }
+    private string backgroundColor { get; set; } = "black";
     private Dictionary<string, ColorScheme> colors { get; } = new Dictionary<string, ColorScheme>() {
         [key: "dark"] = new ColorScheme(Default: "#343A40", Selected: "#0D6EFD", Locked: "#031633"),
         [key: "light"] = new ColorScheme(Default: "#F8F9FA", Selected: "#198754", Locked: "#051B11"),

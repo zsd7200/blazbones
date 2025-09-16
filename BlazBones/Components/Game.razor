@@ -35,14 +35,17 @@
 </div>
 
 @code {
-    private Die die0;
-    private Die die1;
-    private Die die2;
-    private Die die3;
-    private Die die4;
-    private Die die5;
+    private Die? die0;
+    private Die? die1;
+    private Die? die2;
+    private Die? die3;
+    private Die? die4;
+    private Die? die5;
 
     private Die[] dice { get; set; } = new Die[6];
+
+    private List<int[]> rolls = new List<int[]>();
+    private Logic logic = new Logic();
 
     private void RerollAll() {
         for (int i = 0; i < dice.Length; i++) {
@@ -54,8 +57,10 @@
     }
 
     private void RollHandler() {
+        int[] diceCount = new int[6];
         int selectedCount = 0;
         int lockedCount = 0;
+
         for (int i = 0; i < dice.Length; i++) {
             if (dice[i].locked) {
                 lockedCount++;
@@ -64,6 +69,7 @@
 
             if (dice[i].selected) {
                 selectedCount++;
+                diceCount[i]++;
                 continue;
             }
         }
@@ -77,6 +83,13 @@
             // TODO: error handling
             return;
         }
+
+        if (!logic.ValidateSelection(diceCount)) {
+            // TODO: error handling
+            return;
+        }
+
+        rolls.Add(diceCount);
 
         for (int i = 0; i < dice.Length; i++) {
             if (dice[i].selected) {
@@ -97,7 +110,7 @@
 
     protected override void OnAfterRender(bool firstRender) {
         if (firstRender) {
-            dice = [die0, die1, die2, die3, die4, die5];
+            dice = [die0!, die1!, die2!, die3!, die4!, die5!];
         }
     }
 }
