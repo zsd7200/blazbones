@@ -1,0 +1,103 @@
+@rendermode InteractiveServer
+
+<div class="d-flex">
+    <div class="container pt-5 pb-5">
+        <div class="row mb-5">
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die0" />
+            </div>
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die1" />
+            </div>
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die2" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die3" />
+            </div>
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die4" />
+            </div>
+            <div class="col d-flex justify-content-center">
+                <Die @ref="die5" />
+            </div>
+        </div>
+    </div>
+    <div class="d-flex w-20">
+        <Scoreboard></Scoreboard>
+    </div>
+</div>
+<div>
+    <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
+    <button class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+</div>
+
+@code {
+    private Die die0;
+    private Die die1;
+    private Die die2;
+    private Die die3;
+    private Die die4;
+    private Die die5;
+
+    private Die[] dice { get; set; } = new Die[6];
+
+    private void RerollAll() {
+        for (int i = 0; i < dice.Length; i++) {
+            dice[i].locked = false;
+            dice[i].selected = false;
+            dice[i].ChangeColor();
+            dice[i].Roll();
+        }
+    }
+
+    private void RollHandler() {
+        int selectedCount = 0;
+        int lockedCount = 0;
+        for (int i = 0; i < dice.Length; i++) {
+            if (dice[i].locked) {
+                lockedCount++;
+                continue;
+            }
+
+            if (dice[i].selected) {
+                selectedCount++;
+                continue;
+            }
+        }
+
+        if (lockedCount + selectedCount == dice.Length) {
+            RerollAll();
+            return;
+        }
+
+        if (selectedCount == 0) {
+            // TODO: error handling
+            return;
+        }
+
+        for (int i = 0; i < dice.Length; i++) {
+            if (dice[i].selected) {
+                dice[i].locked = true;
+                dice[i].selected = false;
+                dice[i].ChangeColor();
+            }
+
+            if (!dice[i].locked && !dice[i].selected) {
+                dice[i].Roll();
+            }
+        }
+    }
+
+    private void EndHandler() {
+        RerollAll();
+    }
+
+    protected override void OnAfterRender(bool firstRender) {
+        if (firstRender) {
+            dice = [die0, die1, die2, die3, die4, die5];
+        }
+    }
+}
