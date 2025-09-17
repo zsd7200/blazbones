@@ -1,12 +1,14 @@
+@inject PlayerSingleton PlayerSingleton
+
 <table class="table table-striped table-hover">
     <thead>
         <th>Player</th>
         <th>Score</th>
     </thead>
     <tbody>
-        @foreach (KeyValuePair<string, int> player in players) {
+        @foreach (KeyValuePair<string, int> player in PlayerSingleton.players) {
             <tr>
-                <td class="@(players.ElementAt(currPlayer).Key == player.Key ? "fw-bold text-primary" : "")">@player.Key</td>
+                <td class="@(PlayerSingleton.players.ElementAt(currPlayer).Key == player.Key ? "fw-bold text-primary" : "")">@player.Key</td>
                 <td>@player.Value</td>
             </tr>
         }
@@ -14,8 +16,6 @@
 </table>
 
 @code {
-    [Parameter]
-    public Dictionary<string, int> players { get; set; }
     [Parameter]
     public int currPlayer { get; set; }
 }

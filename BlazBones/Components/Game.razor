@@ -1,4 +1,5 @@
 @inject IJSRuntime JS
+@inject PlayerSingleton PlayerSingleton
 
 <div class="d-flex">
     <div class="container pt-5 pb-5">
@@ -26,7 +27,7 @@
         </div>
     </div>
     <div class="d-flex w-20">
-        <Scoreboard players=@players currPlayer=@currPlayer />
+        <Scoreboard currPlayer=@currPlayer />
     </div>
 </div>
 <div>
@@ -34,14 +35,12 @@
     <div>
         <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
         <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
-        <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button>
+        <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
     </div>
 </div>
 <Logic />
 
 @code {
-    [Parameter]
-    public Dictionary<string, int> players { get; set; }
     private int currPlayer { get; set; } = 0;
 
     private Die? die0;
@@ -149,29 +148,29 @@
     private async void EndHandler() {
         DieClickHandler(); // final score gen, needs to happen to go down
 
-        switch(players[players.ElementAt(currPlayer).Key]) {
+        switch(PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key]) {
             default:
-                players[players.ElementAt(currPlayer).Key] += potentialScore;
+                PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key] += potentialScore;
                 break;
             case 0:
                 if (potentialScore >= 1000) {
-                    players[players.ElementAt(currPlayer).Key] += potentialScore;
+                    PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key] += potentialScore;
                 }
                 break;
             case 1000:
             case 1050:
                 if (potentialScore < 0) {
-                    players[players.ElementAt(currPlayer).Key] = 0;
+                    PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key] = 0;
                     break;
                 }
-                players[players.ElementAt(currPlayer).Key] += potentialScore;
+                PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key] += potentialScore;
                 break;
         }
 
         endTurnDisabled = true;
         potentialScore = 0;
         realScore = 0;
-        currPlayer = (players.Count == currPlayer + 1)
+        currPlayer = (PlayerSingleton.players.Count == currPlayer + 1)
             ? 0
             : currPlayer + 1;
         RerollAll();

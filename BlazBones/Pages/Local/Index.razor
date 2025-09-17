@@ -1,5 +1,7 @@
 @page "/local"
 @rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject PlayerSingleton PlayerSingleton
 
 <PageTitle>Local Game | Bones</PageTitle>
 
@@ -44,8 +46,6 @@
     <button class="btn btn-primary" @onclick="StartGameHandler">Start Game</button>
 </div>
 
-<Game players=@players />
-
 @code {
     public Dictionary<string, int> players { get; set; } = new Dictionary<string, int>();
     private int playerCount = 1;
@@ -64,5 +64,8 @@
             }
             players.Add(playerNames[i], 0);
         }
+
+        PlayerSingleton.players = players;
+        Navigation.NavigateTo("/local/game");
     }
 }
