@@ -1,10 +1,10 @@
 @code {
-    private int[] oneScores = new int[6];
-    private int[] twoScores = new int[4];
-    private int[] threeScores = new int[4];
-    private int[] fourScores = new int[4];
-    private int[] fiveScores = new int[6];
-    private int[] sixScores = new int[4];
+    private int[] oneScores = new int[6] { 100, 200, 1000, 2000, 4000, 8000 };
+    private int[] twoScores = new int[4] { 200, 400, 800, 1600 };
+    private int[] threeScores = new int[4] { 300, 600, 1200, 2400 };
+    private int[] fourScores = new int[4] { 400, 800, 1600, 3200 };
+    private int[] fiveScores = new int[6] { 50, 100, 500, 1000, 2000, 4000 };
+    private int[] sixScores = new int[4] { 600, 1200, 2400, 4800 };
     private List<int[]> scores = new List<int[]>();
     private int straightScore = 1000;
     private int backwardScore = -100;
@@ -37,8 +37,12 @@
         return result;
     }
 
-    public int scoreAdd(int[] diceCount) {
+    public int ScoreCalc(int[] diceCount) {
         int score = 0;
+
+        if (scores.Count == 0) {
+            InitializeScores();
+        }
     
         if (IsStraight(diceCount)) {
             return straightScore;
@@ -122,18 +126,18 @@
         return score;
     }
 
-    public int scoreCalc(List<int[]> rolls) {
+    public int ScoreTotalCalc(List<int[]> rolls) {
         int score = 0;
         bool backward = false;
         
         for (int i = 0; i < rolls.Count; i++) {
             // add score for current roll
-            int scrAdd = scoreAdd(rolls[i]);
+            int calc = ScoreCalc(rolls[i]);
             
             // if scoreAdd is less than 0 for any roll,
             // set backward to true--otherwise, increment score
-            if(scrAdd > 0)
-                score += scrAdd;
+            if(calc > 0)
+                score += calc;
             else
                 backward = true;
         }
@@ -145,21 +149,17 @@
         return score;
     }
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-
-        oneScores   = [100, 200, 1000, 2000, 4000, 8000];
-        twoScores   = [200, 400, 800, 1600];
-        threeScores = [300, 600, 1200, 2400];
-        fourScores  = [400, 800, 1600, 3200];
-        fiveScores  = [50, 100, 500, 1000, 2000, 4000];
-        sixScores   = [600, 1200, 2400, 4800];
-
+    private void InitializeScores() {
         scores.Add(oneScores);
         scores.Add(twoScores);
         scores.Add(threeScores);
         scores.Add(fourScores);
         scores.Add(fiveScores);
         scores.Add(sixScores);
+    }
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        InitializeScores();
     }
 }

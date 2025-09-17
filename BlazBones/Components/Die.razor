@@ -1,4 +1,4 @@
-﻿<button disabled=@locked style="background-color: @backgroundColor" class="die border border-10 d-flex user-select-none" @onclick="ClickHandler">
+﻿<button disabled=@locked style="background-color: @backgroundColor" class="die border border-10 d-flex user-select-none" @onclick="HandleClick">
     <img 
         src="media/img/@(dark ? "dark" : "light")/@(value).png" 
         alt="Die with a value of @value"
@@ -19,6 +19,10 @@
         [key: "light"] = new ColorScheme(Default: "#F8F9FA", Selected: "#198754", Locked: "#051B11"),
     };
     
+    [Parameter]
+    public int index { get; set; } = -1;
+    [Parameter]
+    public EventCallback OnClickCallback { get; set; }
 
     private int GetRandomDieValue() {
         return rng.Next(minValue: 1, maxValue: 7);
@@ -29,12 +33,13 @@
         StateHasChanged();
     }
 
-    private void ClickHandler() {
+    private async void HandleClick() {
         if (locked)
             return;
 
         selected = !selected;
         ChangeColor();
+        await OnClickCallback.InvokeAsync();
     }
 
     public void ChangeColor() {

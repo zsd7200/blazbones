@@ -4,24 +4,24 @@
     <div class="container pt-5 pb-5">
         <div class="row mb-5">
             <div class="col d-flex justify-content-center">
-                <Die @ref="die0" />
+                <Die @ref="die0" index=0 OnClickCallback="@DieClickHandler" />
             </div>
             <div class="col d-flex justify-content-center">
-                <Die @ref="die1" />
+                <Die @ref="die1" index=1 OnClickCallback="@DieClickHandler" />
             </div>
             <div class="col d-flex justify-content-center">
-                <Die @ref="die2" />
+                <Die @ref="die2" index=2 OnClickCallback="@DieClickHandler" />
             </div>
         </div>
         <div class="row">
             <div class="col d-flex justify-content-center">
-                <Die @ref="die3" />
+                <Die @ref="die3" index=3 OnClickCallback="@DieClickHandler" />
             </div>
             <div class="col d-flex justify-content-center">
-                <Die @ref="die4" />
+                <Die @ref="die4" index=4 OnClickCallback="@DieClickHandler" />
             </div>
             <div class="col d-flex justify-content-center">
-                <Die @ref="die5" />
+                <Die @ref="die5" index=5 OnClickCallback="@DieClickHandler" />
             </div>
         </div>
     </div>
@@ -30,9 +30,13 @@
     </div>
 </div>
 <div>
-    <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
-    <button class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+    <span>Score: @potentialScore</span>
+    <div>
+        <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
+        <button class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+    </div>
 </div>
+<Logic />
 
 @code {
     private Die? die0;
@@ -43,6 +47,8 @@
     private Die? die5;
 
     private Die[] dice { get; set; } = new Die[6];
+    private int potentialScore { get; set; } = 0;
+    private int realScore { get; set; } = 0;
 
     private List<int[]> rolls = new List<int[]>();
     private Logic logic = new Logic();
@@ -56,8 +62,31 @@
         }
     }
 
+    private void DieClickHandler() {
+        int[] diceCount = { 0, 0, 0, 0, 0, 0 };
+        int selectedCount = 0;
+        int score = 0;
+
+        for (int i = 0; i < dice.Length; i++) {
+            if (!dice[i].selected) {
+                continue;
+            }
+
+            diceCount[dice[i].value - 1]++;
+            selectedCount++;
+        }
+
+        if (selectedCount == 0) {
+            potentialScore = 0;
+            return;
+        }
+
+        score = logic.ScoreCalc(diceCount);
+        potentialScore = (score < 0) ? score : (realScore + score);
+    }
+
     private void RollHandler() {
-        int[] diceCount = new int[6];
+        int[] diceCount = { 0, 0, 0, 0, 0, 0 };
         int selectedCount = 0;
         int lockedCount = 0;
 
@@ -69,14 +98,9 @@
 
             if (dice[i].selected) {
                 selectedCount++;
-                diceCount[i]++;
+                diceCount[dice[i].value - 1]++;
                 continue;
             }
-        }
-
-        if (lockedCount + selectedCount == dice.Length) {
-            RerollAll();
-            return;
         }
 
         if (selectedCount == 0) {
@@ -90,6 +114,12 @@
         }
 
         rolls.Add(diceCount);
+        realScore = potentialScore;
+
+        if (lockedCount + selectedCount == dice.Length) {
+            RerollAll();
+            return;
+        }
 
         for (int i = 0; i < dice.Length; i++) {
             if (dice[i].selected) {
@@ -105,6 +135,9 @@
     }
 
     private void EndHandler() {
+        potentialScore = 0;
+        realScore = 0;
+        rolls = new List<int[]>();
         RerollAll();
     }
 
