@@ -1,7 +1,21 @@
-<div class="border border-primary border-5 d-flex user-select-none">
-</div>
+<table class="table table-striped table-hover">
+    <thead>
+        <th>Player</th>
+        <th>Score</th>
+    </thead>
+    <tbody>
+        @foreach (KeyValuePair<string, int> player in players) {
+            <tr>
+                <td class="@(players.ElementAt(currPlayer).Key == player.Key ? "fw-bold text-primary" : "")">@player.Key</td>
+                <td>@player.Value</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 @code {
     [Parameter]
     public Dictionary<string, int> players { get; set; }
+    [Parameter]
+    public int currPlayer { get; set; }
 }

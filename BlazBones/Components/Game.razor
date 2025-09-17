@@ -1,4 +1,3 @@
-@rendermode InteractiveServer
 @inject IJSRuntime JS
 
 <div class="d-flex">
@@ -27,7 +26,7 @@
         </div>
     </div>
     <div class="d-flex w-20">
-        <Scoreboard players=@players />
+        <Scoreboard players=@players currPlayer=@currPlayer />
     </div>
 </div>
 <div>
@@ -43,7 +42,7 @@
 @code {
     [Parameter]
     public Dictionary<string, int> players { get; set; }
-    private int currPlayer = 0;
+    private int currPlayer { get; set; } = 0;
 
     private Die? die0;
     private Die? die1;
@@ -86,11 +85,6 @@
 
             diceCount[dice[i].value - 1]++;
             selectedCount++;
-        }
-
-        if (selectedCount == 0) {
-            potentialScore = realScore;
-            return;
         }
 
         score = logic.ScoreCalc(diceCount, totalCount);
@@ -153,9 +147,33 @@
     }
 
     private async void EndHandler() {
+        DieClickHandler(); // final score gen, needs to happen to go down
+
+        switch(players[players.ElementAt(currPlayer).Key]) {
+            default:
+                players[players.ElementAt(currPlayer).Key] += potentialScore;
+                break;
+            case 0:
+                if (potentialScore >= 1000) {
+                    players[players.ElementAt(currPlayer).Key] += potentialScore;
+                }
+                break;
+            case 1000:
+            case 1050:
+                if (potentialScore < 0) {
+                    players[players.ElementAt(currPlayer).Key] = 0;
+                    break;
+                }
+                players[players.ElementAt(currPlayer).Key] += potentialScore;
+                break;
+        }
+
         endTurnDisabled = true;
         potentialScore = 0;
         realScore = 0;
+        currPlayer = (players.Count == currPlayer + 1)
+            ? 0
+            : currPlayer + 1;
         RerollAll();
         await Task.Delay(endTurnDisabledTiming);
         endTurnDisabled = false;
