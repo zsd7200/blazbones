@@ -16,6 +16,12 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <script type="text/javascript">
+        window.playAudio = (path) => {
+            let audio = new Audio(path);
+            audio.play();
+        };
+    </script>
 </body>
 
 </html>

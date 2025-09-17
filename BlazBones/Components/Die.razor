@@ -1,4 +1,5 @@
-﻿<button disabled=@locked style="background-color: @backgroundColor" class="die border border-10 d-flex user-select-none" @onclick="HandleClick">
+﻿@using System.Security.Principal
+<button disabled=@locked style="background-color: @backgroundColor" class="die border border-10 d-flex user-select-none @(spin ? "spin" : "")" @onclick="HandleClick">
     <img 
         src="media/img/@(dark ? "dark" : "light")/@(value).png" 
         alt="Die with a value of @value"
@@ -13,6 +14,11 @@
     public bool selected { get; set; } = false;
     public bool locked { get; set; } = false;
     public bool dark { get; set; } = true;
+    private bool spin { get; set; } = false;
+    private int spinTime { get; } = 450;
+    private System.Timers.Timer timer;
+    private int rollTime { get; } = 75;
+    private CancellationTokenSource cts { get; set; } = new CancellationTokenSource();
     private string backgroundColor { get; set; } = "black";
     private Dictionary<string, ColorScheme> colors { get; } = new Dictionary<string, ColorScheme>() {
         [key: "dark"] = new ColorScheme(Default: "#343A40", Selected: "#0D6EFD", Locked: "#031633"),
@@ -49,11 +55,25 @@
         StateHasChanged();
     }
 
-    public void Roll() {
+    public async void Roll() {
         if (locked)
             return;
 
-        SetRandomDieValue();
+        cts = new CancellationTokenSource();
+        cts.CancelAfter(spinTime);
+        spin = true;
+
+        try {
+            while (!cts.Token.IsCancellationRequested) {
+                SetRandomDieValue();
+                await Task.Delay(rollTime, cts.Token);
+            }
+        } catch (TaskCanceledException) {
+            // expected when spin ends
+        } finally {
+            spin = false;
+            SetRandomDieValue();
+        }
     }
 
     protected override void OnInitialized() {

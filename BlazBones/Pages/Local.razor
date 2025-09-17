@@ -4,4 +4,9 @@
 
 <h1 class="text-center">Local Game</h1>
 
-<Game />
+
+<Game players=@players />
+
+@code {
+    public Dictionary<string, int> players { get; set; } = new Dictionary<string, int>();
+}

@@ -126,29 +126,6 @@
         return score;
     }
 
-    public int ScoreTotalCalc(List<int[]> rolls) {
-        int score = 0;
-        bool backward = false;
-        
-        for (int i = 0; i < rolls.Count; i++) {
-            // add score for current roll
-            int calc = ScoreCalc(rolls[i]);
-            
-            // if scoreAdd is less than 0 for any roll,
-            // set backward to true--otherwise, increment score
-            if(calc > 0)
-                score += calc;
-            else
-                backward = true;
-        }
-        
-        // if backward, return the backward value (-100)
-        if (backward)
-            return backwardScore;
-        
-        return score;
-    }
-
     private void InitializeScores() {
         scores.Add(oneScores);
         scores.Add(twoScores);

@@ -1,4 +1,5 @@
 @rendermode InteractiveServer
+@inject IJSRuntime JS
 
 <div class="d-flex">
     <div class="container pt-5 pb-5">
@@ -26,20 +27,24 @@
         </div>
     </div>
     <div class="d-flex w-20">
-        <Scoreboard></Scoreboard>
+        <Scoreboard players=@players />
     </div>
 </div>
 <div>
     <span>Score: @potentialScore</span>
     <div>
         <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
-        <button class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+        <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
         <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button>
     </div>
 </div>
 <Logic />
 
 @code {
+    [Parameter]
+    public Dictionary<string, int> players { get; set; }
+    private int currPlayer = 0;
+
     private Die? die0;
     private Die? die1;
     private Die? die2;
@@ -50,11 +55,14 @@
     private Die[] dice { get; set; } = new Die[6];
     private int potentialScore { get; set; } = 0;
     private int realScore { get; set; } = 0;
+    private Logic logic { get; } = new Logic();
 
-    private List<int[]> rolls = new List<int[]>();
-    private Logic logic = new Logic();
+    // delay to prevent people spamming the button and causing opponents to needlessly lose points
+    private bool endTurnDisabled { get; set; } = false;
+    private int endTurnDisabledTiming { get; } = 2000;
 
     private void RerollAll() {
+        JS.InvokeVoidAsync("playAudio", "media/audio/roll6.wav");
         for (int i = 0; i < dice.Length; i++) {
             dice[i].locked = false;
             dice[i].selected = false;
@@ -94,6 +102,7 @@
         int[] totalCount = { 0, 0, 0, 0, 0, 0 };
         int selectedCount = 0;
         int lockedCount = 0;
+        int unselectedCount = 6;
 
         for (int i = 0; i < dice.Length; i++) {
             totalCount[dice[i].value - 1]++;
@@ -120,13 +129,15 @@
             return;
         }
 
-        rolls.Add(diceCount);
         realScore = potentialScore;
 
         if (lockedCount + selectedCount == dice.Length) {
             RerollAll();
             return;
         }
+
+        unselectedCount -= (lockedCount + selectedCount);
+        JS.InvokeVoidAsync("playAudio", "media/audio/roll" + unselectedCount + ".wav");
 
         for (int i = 0; i < dice.Length; i++) {
             if (dice[i].selected) {
@@ -141,17 +152,18 @@
         }
     }
 
-    private void EndHandler() {
+    private async void EndHandler() {
+        endTurnDisabled = true;
         potentialScore = 0;
         realScore = 0;
-        rolls = new List<int[]>();
         RerollAll();
+        await Task.Delay(endTurnDisabledTiming);
+        endTurnDisabled = false;
     }
 
     private void StraightHandler() {
         potentialScore = 0;
         realScore = 0;
-        rolls = new List<int[]>();
         for (int i = 0; i < dice.Length; i++) {
             dice[i].selected = false;
             dice[i].locked = false;

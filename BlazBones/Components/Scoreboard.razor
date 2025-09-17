@@ -2,21 +2,6 @@
 </div>
 
 @code {
-    public int value { get; set; } = 1; 
-    public bool selected { get; set; } = false;
-    public bool locked { get; set; } = false;
-    private Random rng = new Random();
-
-    private int getRandomDieValue() {
-        return rng.Next(minValue: 1, maxValue: 7);
-    }
-
-    private void setRandomDieValue() {
-        value = getRandomDieValue();
-    }
-
-    protected override void OnInitialized() {
-        setRandomDieValue();
-        base.OnInitialized();
-    }
+    [Parameter]
+    public Dictionary<string, int> players { get; set; }
 }
