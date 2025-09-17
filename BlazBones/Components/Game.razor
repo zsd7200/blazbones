@@ -1,28 +1,38 @@
 @inject IJSRuntime JS
 @inject PlayerSingleton PlayerSingleton
 
-<div class="d-flex">
-    <div class="container pt-5 pb-5">
-        <div class="row mb-5">
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die0" OnClickCallback="@DieClickHandler" />
+<div class="d-flex flex-wrap">
+    <div class="mb-4 w-70">
+        <div class="container pt-5 pb-5">
+            <div class="row mb-5">
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die0" OnClickCallback="@DieClickHandler" />
+                </div>
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die1" OnClickCallback="@DieClickHandler" />
+                </div>
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die2" OnClickCallback="@DieClickHandler" />
+                </div>
             </div>
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die1" OnClickCallback="@DieClickHandler" />
-            </div>
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die2" OnClickCallback="@DieClickHandler" />
+            <div class="row">
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die3" OnClickCallback="@DieClickHandler" />
+                </div>
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die4" OnClickCallback="@DieClickHandler" />
+                </div>
+                <div class="col d-flex justify-content-center">
+                    <Die @ref="die5" OnClickCallback="@DieClickHandler" />
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die3" OnClickCallback="@DieClickHandler" />
-            </div>
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die4" OnClickCallback="@DieClickHandler" />
-            </div>
-            <div class="col d-flex justify-content-center">
-                <Die @ref="die5" OnClickCallback="@DieClickHandler" />
+        <div>
+            <span>Score: @potentialScore</span>
+            <div>
+                <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
+                <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+                <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
             </div>
         </div>
     </div>
@@ -30,14 +40,7 @@
         <Scoreboard currPlayer=@currPlayer />
     </div>
 </div>
-<div>
-    <span>Score: @potentialScore</span>
-    <div>
-        <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
-        <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
-        <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
-    </div>
-</div>
+
 <Logic />
 
 @code {
