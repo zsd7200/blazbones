@@ -28,7 +28,7 @@
 <div class="d-flex justify-content-center flex-wrap">
     @for (int i = 0; i < playerCount; i++) {
         int localVar = i;
-        <div class="input-group mb-3 mr-2 ml-2 w-30 min-w-xs">
+        <div class="input-group mb-3 ms-2 me-2 w-30 min-w-xs">
             <span class="input-group-text" id="player-@i-nickname">Player @(i + 1)</span>
             <input 
                 @bind="playerNames[localVar]"
