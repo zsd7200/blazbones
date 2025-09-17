@@ -9,8 +9,8 @@
     private int straightScore = 1000;
     private int backwardScore = -100;
 
-    public bool ValidateSelection(int[] diceCount) {
-        if (IsStraight(diceCount)) {
+    public bool ValidateSelection(int[] diceCount, int[] totalCount) {
+        if (IsStraight(totalCount)) {
             // TODO: must end turn
             return false;
         }
@@ -24,11 +24,11 @@
         return true;
     }
 
-    public bool IsStraight(int[] diceCount) {
+    public bool IsStraight(int[] totalCount) {
         bool result = true;
 
-        for (int i = 0; i < diceCount.Length; i++) {
-            if (diceCount[i] != 1) {
+        for (int i = 0; i < totalCount.Length; i++) {
+            if (totalCount[i] != 1) {
                 result = false;
                 break;
             }
@@ -37,14 +37,14 @@
         return result;
     }
 
-    public int ScoreCalc(int[] diceCount) {
+    public int ScoreCalc(int[] diceCount, int[] totalCount) {
         int score = 0;
 
         if (scores.Count == 0) {
             InitializeScores();
         }
     
-        if (IsStraight(diceCount)) {
+        if (IsStraight(totalCount)) {
             return straightScore;
         }
 

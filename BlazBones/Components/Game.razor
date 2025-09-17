@@ -34,6 +34,7 @@
     <div>
         <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
         <button class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+        <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button>
     </div>
 </div>
 <Logic />
@@ -64,10 +65,13 @@
 
     private void DieClickHandler() {
         int[] diceCount = { 0, 0, 0, 0, 0, 0 };
+        int[] totalCount = { 0, 0, 0, 0, 0, 0 };
         int selectedCount = 0;
         int score = 0;
 
         for (int i = 0; i < dice.Length; i++) {
+            totalCount[dice[i].value - 1]++;
+
             if (!dice[i].selected) {
                 continue;
             }
@@ -77,20 +81,23 @@
         }
 
         if (selectedCount == 0) {
-            potentialScore = 0;
+            potentialScore = realScore;
             return;
         }
 
-        score = logic.ScoreCalc(diceCount);
+        score = logic.ScoreCalc(diceCount, totalCount);
         potentialScore = (score < 0) ? score : (realScore + score);
     }
 
     private void RollHandler() {
         int[] diceCount = { 0, 0, 0, 0, 0, 0 };
+        int[] totalCount = { 0, 0, 0, 0, 0, 0 };
         int selectedCount = 0;
         int lockedCount = 0;
 
         for (int i = 0; i < dice.Length; i++) {
+            totalCount[dice[i].value - 1]++;
+
             if (dice[i].locked) {
                 lockedCount++;
                 continue;
@@ -108,7 +115,7 @@
             return;
         }
 
-        if (!logic.ValidateSelection(diceCount)) {
+        if (!logic.ValidateSelection(diceCount, totalCount)) {
             // TODO: error handling
             return;
         }
@@ -139,6 +146,18 @@
         realScore = 0;
         rolls = new List<int[]>();
         RerollAll();
+    }
+
+    private void StraightHandler() {
+        potentialScore = 0;
+        realScore = 0;
+        rolls = new List<int[]>();
+        for (int i = 0; i < dice.Length; i++) {
+            dice[i].selected = false;
+            dice[i].locked = false;
+            dice[i].ChangeColor();
+            dice[i].value = i + 1;
+        }
     }
 
     protected override void OnAfterRender(bool firstRender) {
