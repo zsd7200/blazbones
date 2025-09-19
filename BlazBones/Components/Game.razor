@@ -34,6 +34,9 @@
                 <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
                 <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
             </div>
+            <div class="@(displayMessage ? "" : "d-none") mt-2">
+                <span><strong class="@messageTypeClasses">@messageType: </strong>@message</span>
+            </div>
         </div>
     </div>
     <div class="d-flex w-20">
@@ -57,12 +60,51 @@
     private int potentialScore { get; set; } = 0;
     private int realScore { get; set; } = 0;
     private Logic logic { get; } = new Logic();
+    private String messageType { get; set; } = "";
+    private String messageTypeClasses { get; set; } = "";
+    private String message { get; set; } = "";
+    private bool displayMessage { get; set; } = false;
+    private int displayMessageTiming { get; set; } = 5000;
 
     // delay to prevent people spamming the button and causing opponents to needlessly lose points
     private bool endTurnDisabled { get; set; } = false;
-    private int endTurnDisabledTiming { get; } = 2000;
+    private int endTurnDisabledTiming { get; } = 1000;
+
+    private async void ShowMessage(string type, string msg) {
+        messageType = type;
+        message = msg;
+
+        switch (messageType.ToLower()) {
+            default:
+                messageTypeClasses = "text-primary";
+                break;
+            case "notice":
+                messageTypeClasses = "text-primary-emphasis";
+                break;
+            case "warning":
+                messageTypeClasses = "text-warning";
+                break;
+            case "error":
+                messageTypeClasses = "text-danger";
+                break;
+            case "congratulations":
+            case "success":
+                messageTypeClasses = "text-success";
+                break;
+        }
+        displayMessage = true;
+        StateHasChanged();
+        await Task.Delay(displayMessageTiming);
+        HideMessage();
+    }
+
+    private void HideMessage() {
+        displayMessage = false;
+        StateHasChanged();
+    }
 
     private void RerollAll() {
+        HideMessage();
         JS.InvokeVoidAsync("playAudio", "media/audio/roll6.wav");
         for (int i = 0; i < dice.Length; i++) {
             dice[i].locked = false;
@@ -101,12 +143,13 @@
         int unselectedCount = 6;
 
         for (int i = 0; i < dice.Length; i++) {
-            totalCount[dice[i].value - 1]++;
-
             if (dice[i].locked) {
                 lockedCount++;
                 continue;
             }
+
+            // ignore locked when counting total
+            totalCount[dice[i].value - 1]++;
 
             if (dice[i].selected) {
                 selectedCount++;
@@ -116,15 +159,16 @@
         }
 
         if (selectedCount == 0) {
-            // TODO: error handling
+            ShowMessage("Warning", "No dice selected!");
             return;
         }
 
         if (!logic.ValidateSelection(diceCount, totalCount)) {
-            // TODO: error handling
+            ShowMessage("Error", "Invalid selection!");
             return;
         }
 
+        HideMessage();
         realScore = potentialScore;
 
         if (lockedCount + selectedCount == dice.Length) {
@@ -182,6 +226,7 @@
     }
 
     private void StraightHandler() {
+        ShowMessage("Notice", "You rolled a straight! You must end your turn.");
         potentialScore = 0;
         realScore = 0;
         for (int i = 0; i < dice.Length; i++) {
