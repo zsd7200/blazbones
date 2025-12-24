@@ -29,18 +29,20 @@
         </div>
         <div>
             <span>Score: @potentialScore</span>
-            <div>
-                <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
-                <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
-                <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
-            </div>
-            <div class="@(displayMessage ? "" : "d-none") mt-2">
-                <span><strong class="@messageTypeClasses">@messageType: </strong>@message</span>
+            <div class="d-flex gap-2 align-items-center">
+                <div>
+                    <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
+                    <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
+                    <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
+                </div>
+                <div class="@(displayMessage ? "" : "d-none")">
+                    <span><strong class="@messageTypeClasses">@messageType: </strong>@message</span>
+                </div>
             </div>
         </div>
     </div>
     <div class="d-flex w-20">
-        <Scoreboard currPlayer=@currPlayer />
+        <Scoreboard currPlayer=@currPlayer rollCount=@rollCount />
     </div>
 </div>
 
@@ -48,6 +50,7 @@
 
 @code {
     private int currPlayer { get; set; } = 0;
+    private int rollCount { get; set; } = 1;
 
     private Die? die0;
     private Die? die1;
@@ -220,6 +223,9 @@
         currPlayer = (PlayerSingleton.players.Count == currPlayer + 1)
             ? 0
             : currPlayer + 1;
+        rollCount = (currPlayer == 0)
+            ? rollCount + 1
+            : rollCount;
         RerollAll();
         await Task.Delay(endTurnDisabledTiming);
         endTurnDisabled = false;

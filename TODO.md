@@ -1,0 +1,7 @@
+- Can end when all 6 dice are selected and valid
+- Can end turn when all dice are valid (add up score of unselected dice before ending turn)
+- Ending gamestate
+- Rules
+- Light mode
+- Network play
+- Chat
