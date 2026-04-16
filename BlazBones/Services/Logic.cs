@@ -1,20 +1,20 @@
-@code {
-    private int[] oneScores = new int[6] { 100, 200, 1000, 2000, 4000, 8000 };
-    private int[] twoScores = new int[4] { 200, 400, 800, 1600 };
-    private int[] threeScores = new int[4] { 300, 600, 1200, 2400 };
-    private int[] fourScores = new int[4] { 400, 800, 1600, 3200 };
-    private int[] fiveScores = new int[6] { 50, 100, 500, 1000, 2000, 4000 };
-    private int[] sixScores = new int[4] { 600, 1200, 2400, 4800 };
-    private List<int[]> scores = new List<int[]>();
+public class Logic {
+    private int[] oneScores = [100, 200, 1000, 2000, 4000, 8000];
+    private int[] twoScores = [200, 400, 800, 1600];
+    private int[] threeScores = [300, 600, 1200, 2400];
+    private int[] fourScores = [400, 800, 1600, 3200];
+    private int[] fiveScores = [50, 100, 500, 1000, 2000, 4000];
+    private int[] sixScores = [600, 1200, 2400, 4800];
+    private List<int[]> scores = [];
     private int straightScore = 1000;
     private int backwardScore = -100;
 
-    public bool ValidateSelection(int[] diceCount, int[] totalCount) {
-        if (IsStraight(totalCount)) {
-            // TODO: must end turn
-            return false;
-        }
+    public Logic()
+    {
+        InitializeScores();
+    }
 
+    public bool ValidateSelection(int[] diceCount) {
         // 2s, 3s, 4s, and 6s are illegal if only 1 or 2 are selected
         if (diceCount[1] == 1 || diceCount[1] == 2) return false;
         if (diceCount[2] == 1 || diceCount[2] == 2) return false;
@@ -135,8 +135,4 @@
         scores.Add(sixScores);
     }
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        InitializeScores();
-    }
 }

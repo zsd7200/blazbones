@@ -1,4 +1,5 @@
 @inject IJSRuntime JS
+
 @inject PlayerSingleton PlayerSingleton
 
 <div class="d-flex flex-wrap">
@@ -33,7 +34,7 @@
                 <div>
                     <button class="btn btn-secondary" @onclick="RollHandler">Roll</button>
                     <button disabled=@endTurnDisabled class="btn btn-secondary" @onclick="EndHandler">End Turn</button>
-                    <!-- <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button> -->
+                    <button class="btn btn-secondary" @onclick="StraightHandler">End Turn + Roll Straight</button>
                 </div>
                 <div class="@(displayMessage ? "" : "d-none")">
                     <span><strong class="@messageTypeClasses">@messageType: </strong>@message</span>
@@ -46,9 +47,9 @@
     </div>
 </div>
 
-<Logic />
-
 @code {
+    private const int TOTAL_DICE = 6;
+
     private int currPlayer { get; set; } = 0;
     private int rollCount { get; set; } = 1;
 
@@ -59,10 +60,11 @@
     private Die? die4;
     private Die? die5;
 
-    private Die[] dice { get; set; } = new Die[6];
+    private Die[] dice { get; set; } = new Die[TOTAL_DICE];
     private int potentialScore { get; set; } = 0;
     private int realScore { get; set; } = 0;
     private Logic logic { get; } = new Logic();
+    private DiceCounter counter { get; } = new DiceCounter();
     private String messageType { get; set; } = "";
     private String messageTypeClasses { get; set; } = "";
     private String message { get; set; } = "";
@@ -118,55 +120,34 @@
     }
 
     private void DieClickHandler() {
-        int[] diceCount = { 0, 0, 0, 0, 0, 0 };
-        int[] totalCount = { 0, 0, 0, 0, 0, 0 };
-        int selectedCount = 0;
-        int score = 0;
+        DiceRecords records = counter.Count(dice);
+        PotentialScoreCalculator(records);
+    }
 
-        for (int i = 0; i < dice.Length; i++) {
-            totalCount[dice[i].value - 1]++;
-
-            if (!dice[i].selected) {
-                continue;
-            }
-
-            diceCount[dice[i].value - 1]++;
-            selectedCount++;
+    private void PotentialScoreCalculator(DiceRecords? records = null) {
+        if (records == null) {
+            records = counter.Count(dice);
         }
 
-        score = logic.ScoreCalc(diceCount, totalCount);
+        int score = logic.ScoreCalc(records.DiceCount, records.TotalCount);
         potentialScore = (score < 0) ? score : (realScore + score);
     }
 
     private void RollHandler() {
-        int[] diceCount = { 0, 0, 0, 0, 0, 0 };
-        int[] totalCount = { 0, 0, 0, 0, 0, 0 };
-        int selectedCount = 0;
-        int lockedCount = 0;
-        int unselectedCount = 6;
+        DiceRecords records = counter.Count(dice);
 
-        for (int i = 0; i < dice.Length; i++) {
-            if (dice[i].locked) {
-                lockedCount++;
-                continue;
-            }
-
-            // ignore locked when counting total
-            totalCount[dice[i].value - 1]++;
-
-            if (dice[i].selected) {
-                selectedCount++;
-                diceCount[dice[i].value - 1]++;
-                continue;
-            }
-        }
-
-        if (selectedCount == 0) {
+        if (records.SelectedCount == 0) {
             ShowMessage("Warning", "No dice selected!");
             return;
         }
 
-        if (!logic.ValidateSelection(diceCount, totalCount)) {
+        // skip this check if final roll
+        if (logic.IsStraight(records.TotalCount)) {
+            ShowMessage("Notice", "You rolled a straight! You must end your turn.");
+            return;
+        }
+
+        if (!logic.ValidateSelection(records.DiceCount)) {
             ShowMessage("Error", "Invalid selection!");
             return;
         }
@@ -174,13 +155,13 @@
         HideMessage();
         realScore = potentialScore;
 
-        if (lockedCount + selectedCount == dice.Length) {
+        if (records.LockedCount + records.SelectedCount == dice.Length) {
             RerollAll();
             return;
         }
 
-        unselectedCount -= (lockedCount + selectedCount);
-        JS.InvokeVoidAsync("playAudio", "media/audio/roll" + unselectedCount + ".wav");
+        //unselectedCount -= (lockedCount + selectedCount);
+        JS.InvokeVoidAsync("playAudio", "media/audio/roll" + records.UnselectedCount + ".wav");
 
         for (int i = 0; i < dice.Length; i++) {
             if (dice[i].selected) {
@@ -196,7 +177,20 @@
     }
 
     private async void EndHandler() {
-        DieClickHandler(); // final score gen, needs to happen to go down
+        DiceRecords records = counter.Count(dice);
+
+        // need to also make sure they can roll again if it's a straight on last turn once endgame happens
+        if (records.UnselectedCount == 0 && !logic.IsStraight(records.TotalCount)) {
+            ShowMessage("Notice", "All dice are selected and are valid! You must roll again!");
+            return;
+        }
+
+        if (logic.ValidateSelection(records.TotalCount)) {
+            ShowMessage("Notice", "All dice are valid! You must roll again!");
+            return;
+        }
+
+        PotentialScoreCalculator(records); // final score gen, needs to happen to go down
 
         switch(PlayerSingleton.players[PlayerSingleton.players.ElementAt(currPlayer).Key]) {
             default:
@@ -232,7 +226,6 @@
     }
 
     private void StraightHandler() {
-        ShowMessage("Notice", "You rolled a straight! You must end your turn.");
         potentialScore = 0;
         realScore = 0;
         for (int i = 0; i < dice.Length; i++) {
