@@ -1,4 +1,6 @@
 using BlazBones;
+using BlazBones.Services;
+using BlazBones.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapHub<RoomHub>("/roomhub");
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
