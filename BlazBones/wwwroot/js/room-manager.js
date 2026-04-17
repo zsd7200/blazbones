@@ -41,7 +41,10 @@ connection.on('UserJoined', (user, allUsers) => {
 });
 
 connection.on('CreatedGame', (code) => {
-    window.location.href = `/online/game/${code}`;
+    console.log('game start!');
+    if (window.blazorInstance) {
+        window.blazorInstance.invokeMethodAsync("SetGameStart");
+    }
 });
 
 connection.start()
@@ -92,3 +95,4 @@ if (startBtn) {
             });
     });
 }
+

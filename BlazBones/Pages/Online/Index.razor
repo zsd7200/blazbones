@@ -1,19 +1,20 @@
 ﻿@page "/online"
 @rendermode InteractiveServer
+@inject IJSRuntime JS
 
 <PageTitle>Bones</PageTitle>
 
 <h1 class="text-center">Online Game | Bones</h1>
 
 <div class="d-flex flex-column justify-content-center align-items-center gap-3 w-50 mx-auto">
-    @if (!isHost && !isJoining) {
+    @if (!isHost && !isJoining && !gameStart) {
         <div class="d-flex justify-content-center gap-4">
             <button class="btn btn-primary" @onclick=SetIsHost>Host Game</button>
             <button class="btn btn-primary" @onclick=SetIsJoining>Join Game</button>
         </div>
     }
 
-    @if (isHost) {
+    @if (isHost && !gameStart) {
         <div class="d-flex flex-column">
             <label class="fst-italic" for="nickname">Enter Nickname:</label>
             <input type="text" name="nickname" id="nickname" placeholder="nickname" minlength="4" maxlength="16" />
@@ -23,7 +24,7 @@
         <script src="/js/room-manager.js"></script>
     }
 
-    @if (isJoining) {
+    @if (isJoining && !gameStart) {
         <div class="d-flex flex-column">
             <label class="fst-italic" for="nickname">Enter Nickname:</label>
             <input type="text" name="nickname" id="nickname" placeholder="nickname" minlength="4" maxlength="16" />
@@ -37,6 +38,10 @@
     }
 </div>
 
+@if (gameStart) {
+    <Game />
+}
+
 <span id="status">no status</span>
 <ul id="users"></ul>
 
@@ -45,6 +50,22 @@
 @code {
     public bool isHost = false;
     public bool isJoining = false;
+    public bool gameStart = false;
+    private DotNetObjectReference<Index>? objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerBlazorInstance", objRef);
+        }
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
 
     public void SetIsHost() {
         isHost = true;
@@ -54,5 +75,13 @@
     public void SetIsJoining() {
         isJoining = true;
         StateHasChanged();
+    }
+
+    [JSInvokable("SetGameStart")]
+    public async Task SetGameStart()
+    {
+        // update your state here
+        gameStart = true;
+        await InvokeAsync(StateHasChanged);
     }
 }
