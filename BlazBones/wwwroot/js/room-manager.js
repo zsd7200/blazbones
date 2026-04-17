@@ -31,6 +31,9 @@ connection.on('JoinFailed', (msg) => {
 connection.on('UserJoined', (user, allUsers) => {
     status.innerText = `${user} joined room`;
     console.log(allUsers);
+    if (window.blazorInstance) {
+        window.blazorInstance.invokeMethodAsync("SetUsers", allUsers);
+    }
     users.innerHTML = '';
     for (let i = 0; i < allUsers.length; i++) {
         users.innerHTML += `<li>${allUsers[i].username}</li>`;

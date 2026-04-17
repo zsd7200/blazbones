@@ -5,6 +5,7 @@ namespace BlazBones.Services
     public record DiceRecords(
         int[] DiceCount,
         int[] TotalCount,
+        int[] LockedTotals,
         int SelectedCount,
         int LockedCount,
         int UnselectedCount
@@ -16,6 +17,7 @@ namespace BlazBones.Services
         public DiceRecords Count(Die[] dice) {
             int[] diceCount = { 0, 0, 0, 0, 0, 0 };
             int[] totalCount = { 0, 0, 0, 0, 0, 0 };
+            int[] lockedTotals = { 0, 0, 0, 0, 0, 0 };
             int selectedCount = 0;
             int lockedCount = 0;
             int unselectedCount = 6;
@@ -23,6 +25,7 @@ namespace BlazBones.Services
             for (int i = 0; i < dice.Length; i++) {
                 if (dice[i].locked) {
                     lockedCount++;
+                    lockedTotals[dice[i].value - 1]++;
                     continue;
                 }
 
@@ -37,7 +40,7 @@ namespace BlazBones.Services
             }
 
             unselectedCount -= lockedCount + selectedCount;
-            return new DiceRecords(diceCount, totalCount, selectedCount, lockedCount, unselectedCount);
+            return new DiceRecords(diceCount, totalCount, lockedTotals, selectedCount, lockedCount, unselectedCount);
         }
     }
 }

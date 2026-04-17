@@ -1,6 +1,8 @@
 ﻿@page "/online"
 @rendermode InteractiveServer
 @inject IJSRuntime JS
+@inject PlayerSingleton PlayerSingleton
+@inject ConnectedPlayer ConnectedPlayer
 
 <PageTitle>Bones</PageTitle>
 
@@ -43,6 +45,7 @@
 }
 
 <span id="status">no status</span>
+<span>@usernames</span>
 <ul id="users"></ul>
 
 <script src="/js/signalr/dist/browser/signalr.js"></script>
@@ -51,6 +54,7 @@
     public bool isHost = false;
     public bool isJoining = false;
     public bool gameStart = false;
+    public HashSet<string> usernames = [];
     private DotNetObjectReference<Index>? objRef;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -78,10 +82,16 @@
     }
 
     [JSInvokable("SetGameStart")]
-    public async Task SetGameStart()
-    {
-        // update your state here
+    public async Task SetGameStart() {
         gameStart = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable("SetUsers")]
+    public async Task SetUsers(ConnectedPlayer[] allUsers) {
+        for (int i = 0; i < allUsers.Length; i++) {
+            usernames.Add(allUsers[i].Username);
+        }
         await InvokeAsync(StateHasChanged);
     }
 }

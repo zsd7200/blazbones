@@ -3,21 +3,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BlazBones.Hubs
 {
-    public class Player
-    {
-        public Player(string connectionId, string username) {
-            ConnectionId = connectionId;
-            Username = username;
-        }
-
-        public string ConnectionId { get; set; } = "";
-        public string Username { get; set; } = "";
-    }
-
     public class RoomHub : Hub
     {
         
-        private static readonly Dictionary<string, List<Player>> Rooms = [];
+        private static readonly Dictionary<string, List<ConnectedPlayer>> Rooms = [];
 
         private string generateRandomRoomCode() {
             string guid = Guid.NewGuid().ToString("N");
@@ -27,7 +16,7 @@ namespace BlazBones.Hubs
         public async Task CreateRoom(string user) {
             string roomCode = generateRandomRoomCode();
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
-            Rooms[roomCode] = [new Player(Context.ConnectionId, user)];
+            Rooms[roomCode] = [new ConnectedPlayer(Context.ConnectionId, user)];
             await Clients.Caller.SendAsync("CreatedRoom", roomCode);
         }
 
@@ -38,7 +27,7 @@ namespace BlazBones.Hubs
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
-            Rooms[roomCode].Add(new Player(Context.ConnectionId, user));
+            Rooms[roomCode].Add(new ConnectedPlayer(Context.ConnectionId, user));
 
             await Clients.Group(roomCode).SendAsync("UserJoined", user, Rooms[roomCode]);
             await Clients.Caller.SendAsync("JoinedRoom", roomCode);
@@ -48,7 +37,7 @@ namespace BlazBones.Hubs
             List<string> roomsToDelete = [];
 
             foreach (var room in Rooms) {
-                Player? foundPlayer = room.Value.FirstOrDefault(player => player.ConnectionId == Context.ConnectionId);
+                ConnectedPlayer? foundPlayer = room.Value.FirstOrDefault(player => player.ConnectionId == Context.ConnectionId);
                 if (foundPlayer != null) {
                     await Clients.Group(room.Key).SendAsync("UserLeft", foundPlayer.Username);
                     room.Value.Remove(foundPlayer);
