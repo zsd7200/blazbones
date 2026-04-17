@@ -16,27 +16,22 @@ const roomCode = document.querySelector('#room-code');
 let roomCodeValue = roomCode?.value ?? null;
 
 connection.on('CreatedRoom', (code) => {
-    status.innerText = `room created with code: ${code}`;
+    status.innerHTML = `room created with code: <b>${code}<b>`;
     roomCodeValue = code;
 });
 
 connection.on('JoinedRoom', (code) => {
-    status.innerText = `room joined with code ${code}`;
+    status.innerHTML = `room joined with code <b>${code}<b>`;
 });
 
 connection.on('JoinFailed', (msg) => {
-    status.innerText = `Failed to join room. ${msg}`
+    status.innerHTML = `Failed to join room. <em>${msg}</em>`
 });
 
 connection.on('UserJoined', (user, allUsers) => {
-    status.innerText = `${user} joined room`;
-    console.log(allUsers);
+    status.innerHTML = `<b>${user}</b> joined room`;
     if (window.blazorInstance) {
-        window.blazorInstance.invokeMethodAsync("SetUsers", allUsers);
-    }
-    users.innerHTML = '';
-    for (let i = 0; i < allUsers.length; i++) {
-        users.innerHTML += `<li>${allUsers[i].username}</li>`;
+        window.blazorInstance.invokeMethodAsync("SetUsers", allUsers.map(user => user.username));
     }
 
     if (allUsers.length > 1 && startBtn)
@@ -83,7 +78,7 @@ if (joinBtn) {
         nickname.disabled = true;
         roomCode.disabled = true;
         joinBtn.disabled = true;
-        connection.invoke('JoinRoom', roomCode.value, nickname.value)
+        connection.invoke('JoinRoom', roomCode.value.trim(), nickname.value)
             .catch((err) => {
                 return console.error(err);
             });

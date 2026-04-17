@@ -3,9 +3,19 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BlazBones.Hubs
 {
+    public class ConnectedPlayer
+    {
+        public ConnectedPlayer(string connectionId, string username) {
+            ConnectionId = connectionId;
+            Username = username;
+        }
+
+        public string ConnectionId { get; set; } = "";
+        public string Username { get; set; } = "";
+    }
+
     public class RoomHub : Hub
     {
-        
         private static readonly Dictionary<string, List<ConnectedPlayer>> Rooms = [];
 
         private string generateRandomRoomCode() {

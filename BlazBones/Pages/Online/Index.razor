@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject IJSRuntime JS
 @inject PlayerSingleton PlayerSingleton
-@inject ConnectedPlayer ConnectedPlayer
 
 <PageTitle>Bones</PageTitle>
 
@@ -38,15 +37,28 @@
         <button class="btn btn-primary" id="join-btn">Join Game</button>
         <script src="/js/room-manager.js"></script>
     }
+    @if (!gameStart) {
+        <span id="status"></span>
+
+        @if (usernames.Count > 0) {
+            <span>Connected Users:</span>
+            <ul id="users">
+                @foreach (string user in usernames) {
+                    <li>@user</li>
+                }
+            </ul>
+        }
+
+    }
 </div>
+
+
 
 @if (gameStart) {
     <Game />
 }
 
-<span id="status">no status</span>
-<span>@usernames</span>
-<ul id="users"></ul>
+
 
 <script src="/js/signalr/dist/browser/signalr.js"></script>
 
@@ -88,9 +100,9 @@
     }
 
     [JSInvokable("SetUsers")]
-    public async Task SetUsers(ConnectedPlayer[] allUsers) {
+    public async Task SetUsers(string[] allUsers) {
         for (int i = 0; i < allUsers.Length; i++) {
-            usernames.Add(allUsers[i].Username);
+            usernames.Add(allUsers[i]);
         }
         await InvokeAsync(StateHasChanged);
     }
