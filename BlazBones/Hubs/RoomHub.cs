@@ -45,6 +45,8 @@ namespace BlazBones.Hubs
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception) {
+            await base.OnDisconnectedAsync(exception);
+            return;
             List<string> roomsToDelete = [];
 
             foreach (var room in Rooms) {
@@ -64,6 +66,14 @@ namespace BlazBones.Hubs
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task CreateGame(string roomCode) {
+            await Clients.Group(roomCode).SendAsync("CreatedGame", roomCode);
+        }
+
+        public async Task GetRoomData(string roomCode) {
+            await Clients.Group(roomCode).SendAsync("ReceiveRoomData", Rooms[roomCode]);
         }
 
         public async Task SendMessage(string roomCode, string user, string message) {

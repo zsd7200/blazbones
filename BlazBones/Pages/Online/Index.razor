@@ -1,26 +1,39 @@
 ﻿@page "/online"
+@rendermode InteractiveServer
 
 <PageTitle>Bones</PageTitle>
 
 <h1 class="text-center">Online Game | Bones</h1>
 
-
-<div class="d-flex flex-column justify-content-center align-items-center gap-5 w-50 mx-auto mt-5">
-    <div class="d-flex flex-column">
-        <label class="fst-italic" for="nickname">Enter Nickname:</label>
-        <input type="text" name="nickname" id="nickname" placeholder="nickname" minlength="4" maxlength="16" />
-    </div>
-    @if (!isJoining) {
-        <button class="btn btn-primary" id="create-btn" disabled onclick=@HostClick>Host Game</button>
-    }
-    @if (!isHost) {
-        <div class="d-flex flex-column gap-3">
-            <div class="d-flex flex-column">
-                <label class="fst-italic" for="room-code">Enter Room Code:</label>
-                <input type="text" name="room-code" id="room-code" placeholder="room code" maxlength="6" />
-            </div>
-            <button class="btn btn-primary" id="join-btn" disabled onclick=@JoinClick>Join Game</button>
+<div class="d-flex flex-column justify-content-center align-items-center gap-3 w-50 mx-auto">
+    @if (!isHost && !isJoining) {
+        <div class="d-flex justify-content-center gap-4">
+            <button class="btn btn-primary" @onclick=SetIsHost>Host Game</button>
+            <button class="btn btn-primary" @onclick=SetIsJoining>Join Game</button>
         </div>
+    }
+
+    @if (isHost) {
+        <div class="d-flex flex-column">
+            <label class="fst-italic" for="nickname">Enter Nickname:</label>
+            <input type="text" name="nickname" id="nickname" placeholder="nickname" minlength="4" maxlength="16" />
+        </div>
+        <button class="btn btn-primary" id="create-btn">Host Game</button>
+        <button class="btn btn-primary" id="start-btn" disabled>Start Game</button>
+        <script src="/js/room-manager.js"></script>
+    }
+
+    @if (isJoining) {
+        <div class="d-flex flex-column">
+            <label class="fst-italic" for="nickname">Enter Nickname:</label>
+            <input type="text" name="nickname" id="nickname" placeholder="nickname" minlength="4" maxlength="16" />
+        </div>
+        <div class="d-flex flex-column">
+            <label class="fst-italic" for="room-code">Enter Room Code:</label>
+            <input type="text" name="room-code" id="room-code" placeholder="room code" maxlength="6" />
+        </div>
+        <button class="btn btn-primary" id="join-btn">Join Game</button>
+        <script src="/js/room-manager.js"></script>
     }
 </div>
 
@@ -28,17 +41,18 @@
 <ul id="users"></ul>
 
 <script src="/js/signalr/dist/browser/signalr.js"></script>
-<script src="/js/room-manager.js"></script>
 
 @code {
-    bool isHost = false;
-    bool isJoining = false;
+    public bool isHost = false;
+    public bool isJoining = false;
 
-    private void HostClick() {
+    public void SetIsHost() {
         isHost = true;
+        StateHasChanged();
     }
 
-    private void JoinClick() {
+    public void SetIsJoining() {
         isJoining = true;
+        StateHasChanged();
     }
 }
