@@ -108,7 +108,7 @@
         StateHasChanged();
     }
 
-    private void RerollAll() {
+    public void RerollAll() {
         HideMessage();
         JS.InvokeVoidAsync("playAudio", "media/audio/roll6.wav");
         for (int i = 0; i < dice.Length; i++) {

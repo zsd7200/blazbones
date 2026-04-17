@@ -55,7 +55,7 @@
 
 
 @if (gameStart) {
-    <Game />
+    <Game @ref="game" />
 }
 
 
@@ -68,6 +68,8 @@
     public bool gameStart = false;
     public HashSet<string> usernames = [];
     private DotNetObjectReference<Index>? objRef;
+    
+    private Game? game;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

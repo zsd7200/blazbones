@@ -30,8 +30,8 @@
         return rng.Next(minValue: 1, maxValue: 7);
     }
 
-    private void SetRandomDieValue() {
-        value = GetRandomDieValue();
+    private void SetDieValue(int? number = null) {
+        value = number ?? GetRandomDieValue();
         StateHasChanged();
     }
 
@@ -53,7 +53,7 @@
         StateHasChanged();
     }
 
-    public async void Roll() {
+    public async void Roll(int? number = null) {
         if (locked)
             return;
 
@@ -63,20 +63,20 @@
 
         try {
             while (!cts.Token.IsCancellationRequested) {
-                SetRandomDieValue();
+                SetDieValue(number);
                 await Task.Delay(rollTime, cts.Token);
             }
         } catch (TaskCanceledException) {
             // expected when spin ends
         } finally {
             spin = false;
-            SetRandomDieValue();
+            SetDieValue(number);
         }
     }
 
     protected override void OnInitialized() {
         base.OnInitialized();
-        SetRandomDieValue();
+        SetDieValue();
         ChangeColor();
     }
 }
