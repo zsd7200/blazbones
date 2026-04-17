@@ -45,8 +45,6 @@ namespace BlazBones.Hubs
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception) {
-            await base.OnDisconnectedAsync(exception);
-            return;
             List<string> roomsToDelete = [];
 
             foreach (var room in Rooms) {
